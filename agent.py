@@ -4,17 +4,18 @@ from utils import clamp
 
 
 class Agent:
-    def __init__(self):
-        self.coords = (0, 0)
+    def __init__(self, x=0, y=0):
+        self.coords = (x, y)
 
-    def spawn_agent(self, GRID_W: int, GRID_H: int) -> None:
-        self.coords = rnd.randint(0, GRID_W - 1), rnd.randint(0, GRID_H - 1)
+    def place_random(self, size: tuple[int, int]) -> None:
+        w, h = size
+        self.coords = rnd.randint(0, w - 1), rnd.randint(0, h - 1)
 
-    def step(self, GRID_W: int, GRID_H: int) -> None:
+    def step(self, size: tuple[int, int]) -> None:
+        w, h = size
         dx, dy = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1), (0, 0)])
-        nx = clamp(self.coords[0] + dx, 0, GRID_W - 1)
-        ny = clamp(self.coords[1] + dy, 0, GRID_H - 1)
-        self.coords = (nx, ny)
+        x, y = self.coords
+        self.coords = (clamp(x + dx, 0, w - 1), clamp(y + dy, 0, h - 1))
 
     def draw_agent(self, canvas: tk.Canvas, CELL: int) -> None:
         cx = self.coords[0] * CELL + CELL // 2

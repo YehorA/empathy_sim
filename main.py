@@ -11,8 +11,6 @@ GRID_H = 12
 CELL = 32
 SEED = 42
 
-agents: list[Agent] = []
-
 
 def draw_grid(canvas: tk.Canvas) -> None:
     for i in range(GRID_W + 1):
@@ -23,7 +21,7 @@ def draw_grid(canvas: tk.Canvas) -> None:
         canvas.create_line(0, Y, GRID_W * CELL, Y, fill="#333", tags="grid")
 
 
-def tick(canvas: tk.Canvas, root: tk.Tk, food: Food) -> None:
+def tick(canvas: tk.Canvas, root: tk.Tk, food: Food, agents: list[Agent]) -> None:
     food.regrow_step(p=0.03)
     canvas.delete("food")
     food.draw(canvas, CELL)
@@ -31,10 +29,10 @@ def tick(canvas: tk.Canvas, root: tk.Tk, food: Food) -> None:
     canvas.delete("agent")
 
     for i in agents:
-        i.step(GRID_W, GRID_H)
+        i.step((GRID_W, GRID_H))
         i.draw_agent(canvas, CELL)
 
-    root.after(200, lambda: tick(canvas, root, food))
+    root.after(200, lambda: tick(canvas, root, food, agents))
 
 
 def main() -> None:
@@ -60,11 +58,13 @@ def main() -> None:
     food.draw(canvas, CELL)
 
     # agent spawn
-    for i in range(10):
-        agents.append(Agent())
-        agents[i].spawn_agent(GRID_W, GRID_H)
+    agents = []
+    for _ in range(10):
+        a = Agent()
+        a.place_random((GRID_W, GRID_H))
+        agents.append(a)
 
-    tick(canvas, root, food)
+    tick(canvas, root, food, agents)
     root.mainloop()
 
 
