@@ -1,5 +1,6 @@
 import tkinter as tk
 import random as rnd
+from utils import clamp
 
 
 class Food:
@@ -16,13 +17,13 @@ class Food:
     def randomize(self, low: int = 0, high: int = 3, p: float = 0.05) -> None:
         for x, y in self.foods:
             if rnd.random() < p:
-                self.set_at(x, y, rnd.randint(low, min(high, self.max_food)))
+                self.set_at(x, y, rnd.randint(low, high))
 
     def amount_at(self, x: int, y: int) -> int:
         return self.foods.get((x, y), 0)
 
     def set_at(self, x: int, y: int, value: int) -> None:
-        self.foods[(x, y)] = value
+        self.foods[(x, y)] = clamp(value, 0, self.max_food)
 
     def take_at(self, x: int, y: int, value: int) -> int:
         amount = self.amount_at(x, y)
@@ -36,7 +37,7 @@ class Food:
     def regrow_step(self, p: float = 0.05, delta: int = 1) -> None:
         for x, y in self.foods:
             if rnd.random() < p:
-                self.set_at(x, y, min(self.amount_at(x, y) + delta, self.max_food))
+                self.set_at(x, y, self.amount_at(x, y) + delta)
 
     def draw(self, canvas: tk.Canvas, cell_px: int) -> None:
         for (x, y), amt in self.foods.items():
