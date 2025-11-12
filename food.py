@@ -36,7 +36,7 @@ class Food:
     def regrow_step(self, p: float = 0.05, delta: int = 1) -> None:
         for x, y in self.foods:
             if rnd.random() < p:
-                self.set_at(x, y, self.amount_at(x, y) + delta)
+                self.set_at(x, y, min(self.amount_at(x, y) + delta, self.max_food))
 
     def draw(self, canvas: tk.Canvas, cell_px: int) -> None:
         for (x, y), amt in self.foods.items():
