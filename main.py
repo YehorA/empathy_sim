@@ -4,6 +4,7 @@ import tkinter as tk
 import random as rnd
 from food import Food
 from agent import Agent
+from utils import clamp
 
 GRID_W = 20
 GRID_H = 12
@@ -20,10 +21,6 @@ def draw_grid(canvas: tk.Canvas) -> None:
     for i in range(GRID_H + 1):
         Y = i * CELL
         canvas.create_line(0, Y, GRID_W * CELL, Y, fill="#333", tags="grid")
-
-
-def clamp(v: int, lo: int = 0, hi: int = 1) -> int:
-    return max(lo, min(v, hi))
 
 
 def tick(canvas: tk.Canvas, root: tk.Tk, food: Food) -> None:
