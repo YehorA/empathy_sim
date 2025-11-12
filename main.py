@@ -2,6 +2,7 @@
 
 import tkinter as tk
 import random as rnd
+from food import Food
 
 GRID_W = 20
 GRID_H = 12
@@ -9,8 +10,6 @@ CELL = 32
 SEED = 42
 
 agents: list[tuple[int, int]] = []
-root = None
-canvas = None
 
 
 def draw_grid(canvas: tk.Canvas) -> None:
@@ -33,7 +32,7 @@ def draw_agents(canvas: tk.Canvas) -> None:
         cy = y * CELL + CELL // 2
         r = CELL // 6
         canvas.create_oval(
-            cx - r, cy - r, cx + r, cy + r, fill="#4ade80", outline="", tags="agent"
+            cx - r, cy - r, cx + r, cy + r, fill="#100dc4", outline="", tags="agent"
         )
 
 
@@ -51,15 +50,20 @@ def step() -> None:
     agents[:] = moved
 
 
-def tick(canvas: tk.Canvas, root: tk.Tk) -> None:
+def tick(canvas: tk.Canvas, root: tk.Tk, food: Food) -> None:
+    food.regrow_step(p=0.03)
+    canvas.delete("food")
+    food.draw(canvas, CELL)
+
     step()
     canvas.delete("agent")
     draw_agents(canvas)
-    root.after(200, lambda: tick(canvas, root))
+    root.after(200, lambda: tick(canvas, root, food))
 
 
 def main() -> None:
     rnd.seed(SEED)
+
     root = tk.Tk()
     root.title("empathy_sim — 0.1")
 
@@ -72,10 +76,14 @@ def main() -> None:
     )
     canvas.pack()
 
+    food = Food(GRID_W, GRID_H, max_food=5)
+    food.randomize(0, 3)
+    food.draw(canvas, CELL)
+
     draw_grid(canvas)
 
     spawn_agents(10)
-    tick(canvas, root)
+    tick(canvas, root, food)
     root.mainloop()
 
 
