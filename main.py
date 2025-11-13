@@ -28,8 +28,11 @@ def tick(canvas: tk.Canvas, root: tk.Tk, food: Food, agents: list[Agent]) -> Non
     canvas.delete("agent")
 
     for i in agents:
-        i.step((GRID_W, GRID_H), food)
-        i.draw(canvas, CELL)
+        if i.alive:
+            i.step((GRID_W, GRID_H), food)
+            i.draw(canvas, CELL)
+        else:
+            i.draw(canvas, CELL, "#c40d0d")
         # print(i.energy)
 
     root.after(400, lambda: tick(canvas, root, food, agents))
