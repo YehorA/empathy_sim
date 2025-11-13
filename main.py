@@ -4,7 +4,6 @@ import tkinter as tk
 import random as rnd
 from food import Food
 from agent import Agent
-from utils import clamp
 
 GRID_W = 20
 GRID_H = 12
@@ -29,10 +28,11 @@ def tick(canvas: tk.Canvas, root: tk.Tk, food: Food, agents: list[Agent]) -> Non
     canvas.delete("agent")
 
     for i in agents:
-        i.step((GRID_W, GRID_H))
-        i.draw_agent(canvas, CELL)
+        i.step((GRID_W, GRID_H), food)
+        i.draw(canvas, CELL)
+        # print(i.energy)
 
-    root.after(200, lambda: tick(canvas, root, food, agents))
+    root.after(400, lambda: tick(canvas, root, food, agents))
 
 
 def main() -> None:
