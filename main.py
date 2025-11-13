@@ -2,40 +2,12 @@
 
 import tkinter as tk
 import random as rnd
-from food import Food
-from agent import Agent
+from world import World
 
 GRID_W = 20
 GRID_H = 12
 CELL = 32
 SEED = 42
-
-
-def draw_grid(canvas: tk.Canvas) -> None:
-    for i in range(GRID_W + 1):
-        X = i * CELL
-        canvas.create_line(X, 0, X, GRID_H * CELL, fill="#333", tags="grid")
-    for i in range(GRID_H + 1):
-        Y = i * CELL
-        canvas.create_line(0, Y, GRID_W * CELL, Y, fill="#333", tags="grid")
-
-
-def tick(canvas: tk.Canvas, root: tk.Tk, food: Food, agents: list[Agent]) -> None:
-    food.regrow_step(p=0.03)
-    canvas.delete("food")
-    food.draw(canvas, CELL)
-
-    canvas.delete("agent")
-
-    for i in agents:
-        if i.alive:
-            i.step((GRID_W, GRID_H), food)
-            i.draw(canvas, CELL)
-        else:
-            i.draw(canvas, CELL, "#c40d0d")
-        # print(i.energy)
-
-    root.after(400, lambda: tick(canvas, root, food, agents))
 
 
 def main() -> None:
@@ -53,21 +25,11 @@ def main() -> None:
     )
     canvas.pack()
 
-    draw_grid(canvas)
+    world = World(GRID_W, GRID_H, CELL, canvas)
+    world.draw_grid()
+    world.spawn()
+    world.tick(root)
 
-    # food spawn
-    food = Food(GRID_W, GRID_H, max_food=5)
-    food.randomize(0, 3)
-    food.draw(canvas, CELL)
-
-    # agent spawn
-    agents = []
-    for _ in range(10):
-        a = Agent()
-        a.place_random((GRID_W, GRID_H))
-        agents.append(a)
-
-    tick(canvas, root, food, agents)
     root.mainloop()
 
 
