@@ -10,7 +10,7 @@ class World:
         self.cell = cell
         self.canvas = canvas
         self.food = Food(width, height, max_food=5)
-        self.agents = []
+        self.agents: list[Agent] = []
 
     def draw_grid(self) -> None:
         for i in range(self.width + 1):
@@ -44,7 +44,12 @@ class World:
 
         for i in self.agents:
             if i.alive:
-                i.step((self.width, self.height), self.food)
+                # give agent info about how much food there is in the cell
+                i.is_there_food(self.food.amount_at(i.coords[0], i.coords[1]))
+                # if agent found any food at the cell, it ate it and took one food from the cell
+                if i.there_is_food:
+                    self.food.take_at(i.coords[0], i.coords[1], 1)
+                i.step((self.width, self.height))
                 i.draw(self.canvas, self.cell)
             else:
                 i.draw(self.canvas, self.cell, "#c40d0d")

@@ -1,7 +1,6 @@
 import tkinter as tk
 import random as rnd
 from utils import clamp
-from food import Food
 
 
 class Agent:
@@ -9,15 +8,15 @@ class Agent:
         self.coords = (x, y)
         self.energy = 20
         self.alive = True
+        self.there_is_food = False
 
     def place_random(self, size: tuple[int, int]) -> None:
         w, h = size
         self.coords = rnd.randint(0, w - 1), rnd.randint(0, h - 1)
 
-    def step(self, size: tuple[int, int], food: Food) -> None:
-        food_amount = food.amount_at(self.coords[0], self.coords[1])
-        if food_amount > 0:
-            self.eat(food)
+    def step(self, size: tuple[int, int]) -> None:
+        if self.there_is_food:
+            self.eat()
         else:
             self.move(size)
         self.death()
@@ -30,9 +29,8 @@ class Agent:
             cx - r, cy - r, cx + r, cy + r, fill=colour, outline="", tags="agent"
         )
 
-    def eat(self, food: Food) -> None:
+    def eat(self) -> None:
         self.energy += 1
-        food.take_at(self.coords[0], self.coords[1], 1)
 
     def move(self, size: tuple[int, int]) -> None:
         self.energy -= 1
@@ -44,3 +42,11 @@ class Agent:
     def death(self):
         if self.energy <= 0:
             self.alive = False
+
+    # ask world how much food there is in the current cell
+
+    def is_there_food(self, food_amount: int) -> None:
+        if food_amount > 0:
+            self.there_is_food = True
+        else:
+            self.there_is_food = False
