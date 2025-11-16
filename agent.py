@@ -46,7 +46,4 @@ class Agent:
     # ask world how much food there is in the current cell
 
     def is_there_food(self, food_amount: int) -> None:
-        if food_amount > 0:
-            self.there_is_food = True
-        else:
-            self.there_is_food = False
+        self.there_is_food = food_amount > 0
