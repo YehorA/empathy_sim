@@ -90,12 +90,12 @@ class World:
                 # give agent info about how much food there is in the cell
                 i.is_there_food(self.food.amount_at(i.coords[0], i.coords[1]))
                 # if agent found any food at the cell, it took one food from the cell
-                if i.there_is_food:
+                if i.there_is_food and i.energy < i.max_energy:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
                 i.step((self.width, self.height))
                 i.draw(self.canvas, self.cell)
             else:
-                i.draw(self.canvas, self.cell, "#c40d0d")
+                i.draw(self.canvas, self.cell)
 
         self.draw_hud()
 
