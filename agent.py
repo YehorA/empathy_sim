@@ -11,12 +11,21 @@ class Agent:
         self.there_is_food = False
         self.max_energy = 20
         self.ate = False
+        self.age = 0
+        self.reproduction_cooldown = 10
 
     def place_random(self, size: tuple[int, int]) -> None:
         w, h = size
         self.coords = rnd.randint(0, w - 1), rnd.randint(0, h - 1)
 
+    # additonal note, messy system, but if was "born" start with 10 energy and bigger reproduction_cooldown
+    def place_on_coords(self, x, y) -> None:
+        self.coords = (x, y)
+        self.energy = 10
+        self.reproduction_cooldown = 20
+
     def step(self, size: tuple[int, int], view: dict[tuple[int, int], int]) -> None:
+        self.ate = False
         dx, dy = self.decide(view)
 
         if (dx, dy) == (0, 0):
@@ -24,7 +33,8 @@ class Agent:
                 self.eat()
         else:
             self.move(size, (dx, dy))
-            self.ate = False
+        self.age += 1
+        self.reproduction_cooldown = max(0, self.reproduction_cooldown - 1)
         self.death()
 
     def compute_colour(self) -> str:
@@ -64,7 +74,7 @@ class Agent:
         self.coords = (clamp(x + dx, 0, w - 1), clamp(y + dy, 0, h - 1))
 
     def death(self):
-        if self.energy <= 0:
+        if self.energy <= 0 or self.age > 100:
             self.alive = False
 
     # ask world how much food there is in the current cell
@@ -83,3 +93,12 @@ class Agent:
             return rnd.choice(has_food)
 
         return rnd.choice([(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)])
+
+    def is_ready_to_reproduce(self) -> bool:
+        if self.alive and self.energy > 14 and self.reproduction_cooldown == 0:
+            return True
+        return False
+
+    def reproduce(self) -> None:
+        self.energy -= 5
+        self.reproduction_cooldown = 20

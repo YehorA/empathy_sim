@@ -2,6 +2,7 @@ import tkinter as tk
 from food import Food
 from agent import Agent
 from utils import clamp
+import random as rnd
 
 
 class World:
@@ -89,6 +90,18 @@ class World:
             view[(dx, dy)] = self.food.amount_at(nx, ny)
         return view
 
+    def coord_agent_view(self, x, y) -> list[Agent]:
+        # Returns agents in the current cell and 4 neighbors
+        dirs = [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]
+        agents_near: list[Agent] = []
+        for dx, dy in dirs:
+            nx = clamp(x + dx, 0, self.width - 1)
+            ny = clamp(y + dy, 0, self.height - 1)
+            for i in self.agents:
+                if i.coords == (nx, ny):
+                    agents_near.append(i)
+        return agents_near
+
     def tick(self, root: tk.Tk) -> None:
         self.food.regrow_step(p=0.03)
         self.canvas.delete("food")
@@ -98,6 +111,9 @@ class World:
 
         for i in self.agents:
             if i.alive:
+                agents_nearby = self.coord_agent_view(i.coords[0], i.coords[1])
+                self.reproduction(i, agents_nearby)
+
                 view = self.coord_food_view(i.coords[0], i.coords[1])
                 # if agent found any food at the cell, it took one food from the cell
                 # if i.there_is_food and i.energy < i.max_energy:
@@ -112,3 +128,23 @@ class World:
         self.draw_hud()
 
         root.after(400, lambda: self.tick(root))
+
+    # AGENT REPRODUCTION SHOULD BE SEPERATED INTO CLASS LATER
+
+    def reproduction(self, agent: Agent, agents_nearby: list[Agent]) -> None:
+        if agent.is_ready_to_reproduce():
+            ready_to_reproduce_agents: list[Agent] = []
+            for i in agents_nearby:
+                if i.is_ready_to_reproduce:
+                    ready_to_reproduce_agents.append(i)
+            if ready_to_reproduce_agents:
+                other_agent = rnd.choice(ready_to_reproduce_agents)
+                agent.reproduce()
+                other_agent.reproduce()
+
+                spawn_pos = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
+                a = Agent()
+                a.place_on_coords(
+                    agent.coords[0] + spawn_pos[0], agent.coords[1] + spawn_pos[1]
+                )
+                self.agents.append(a)
