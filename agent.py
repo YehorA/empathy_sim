@@ -10,16 +10,21 @@ class Agent:
         self.alive = True
         self.there_is_food = False
         self.max_energy = 20
+        self.ate = False
 
     def place_random(self, size: tuple[int, int]) -> None:
         w, h = size
         self.coords = rnd.randint(0, w - 1), rnd.randint(0, h - 1)
 
-    def step(self, size: tuple[int, int]) -> None:
-        if self.there_is_food and self.energy < self.max_energy:
-            self.eat()
+    def step(self, size: tuple[int, int], view: dict[tuple[int, int], int]) -> None:
+        dx, dy = self.decide(view)
+
+        if (dx, dy) == (0, 0):
+            if self.energy < self.max_energy:
+                self.eat()
         else:
-            self.move(size)
+            self.move(size, (dx, dy))
+            self.ate = False
         self.death()
 
     def compute_colour(self) -> str:
@@ -49,11 +54,12 @@ class Agent:
 
     def eat(self) -> None:
         self.energy += 1
+        self.ate = True
 
-    def move(self, size: tuple[int, int]) -> None:
+    def move(self, size: tuple[int, int], direction: tuple[int, int]) -> None:
         self.energy -= 1
         w, h = size
-        dx, dy = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1), (0, 0)])
+        dx, dy = direction
         x, y = self.coords
         self.coords = (clamp(x + dx, 0, w - 1), clamp(y + dy, 0, h - 1))
 
@@ -63,5 +69,17 @@ class Agent:
 
     # ask world how much food there is in the current cell
 
-    def is_there_food(self, food_amount: int) -> None:
-        self.there_is_food = food_amount > 0
+    # def is_there_food(self, food_amount: int) -> None:
+    #     self.there_is_food = food_amount > 0
+
+    # de cides direction to move to
+    def decide(self, view: dict[tuple[int, int], int]):
+        if view[0, 0] > 0:
+            return (0, 0)
+        has_food: list[tuple[int, int]] = [
+            (dx, dy) for (dx, dy), amt in view.items() if amt > 0
+        ]
+        if has_food:
+            return rnd.choice(has_food)
+
+        return rnd.choice([(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)])

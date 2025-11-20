@@ -1,6 +1,7 @@
 import tkinter as tk
 from food import Food
 from agent import Agent
+from utils import clamp
 
 
 class World:
@@ -39,7 +40,7 @@ class World:
             10,
             10,
             text=f"Alive: {alive}",
-            fill="#ffffff",
+            fill="#fffc4f",
             anchor="nw",
             tags="hud",
             font=("Helvetica", 12),
@@ -49,7 +50,7 @@ class World:
             10,
             30,
             text=f"Avg energy: {avg_energy}",
-            fill="#ffffff",
+            fill="#fffc4f",
             anchor="nw",
             tags="hud",
             font=("Helvetica", 12),
@@ -78,6 +79,16 @@ class World:
             a.place_random((self.width, self.height))
             self.agents.append(a)
 
+    def coord_food_view(self, x, y) -> dict[tuple[int, int], int]:
+        # Returns food amount in the current cell and 4 neighbors
+        dirs = [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]
+        view = {}
+        for dx, dy in dirs:
+            nx = clamp(x + dx, 0, self.width - 1)
+            ny = clamp(y + dy, 0, self.height - 1)
+            view[(dx, dy)] = self.food.amount_at(nx, ny)
+        return view
+
     def tick(self, root: tk.Tk) -> None:
         self.food.regrow_step(p=0.03)
         self.canvas.delete("food")
@@ -87,12 +98,13 @@ class World:
 
         for i in self.agents:
             if i.alive:
-                # give agent info about how much food there is in the cell
-                i.is_there_food(self.food.amount_at(i.coords[0], i.coords[1]))
+                view = self.coord_food_view(i.coords[0], i.coords[1])
                 # if agent found any food at the cell, it took one food from the cell
-                if i.there_is_food and i.energy < i.max_energy:
+                # if i.there_is_food and i.energy < i.max_energy:
+                #     self.food.take_at(i.coords[0], i.coords[1], 1)
+                i.step((self.width, self.height), view)
+                if i.ate:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
-                i.step((self.width, self.height))
                 i.draw(self.canvas, self.cell)
             else:
                 i.draw(self.canvas, self.cell)
