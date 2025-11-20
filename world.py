@@ -75,7 +75,7 @@ class World:
         self.food.draw(self.canvas, self.cell)
 
         # agent spawn
-        for _ in range(10):
+        for _ in range(20):
             a = Agent()
             a.place_random((self.width, self.height))
             self.agents.append(a)
@@ -90,7 +90,7 @@ class World:
             view[(dx, dy)] = self.food.amount_at(nx, ny)
         return view
 
-    def coord_agent_view(self, x, y) -> list[Agent]:
+    def coord_agent_view(self, x, y, exclude: Agent) -> list[Agent]:
         # Returns agents in the current cell and 4 neighbors
         dirs = [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]
         agents_near: list[Agent] = []
@@ -98,6 +98,8 @@ class World:
             nx = clamp(x + dx, 0, self.width - 1)
             ny = clamp(y + dy, 0, self.height - 1)
             for i in self.agents:
+                if i is exclude:
+                    continue
                 if i.coords == (nx, ny):
                     agents_near.append(i)
         return agents_near
@@ -111,7 +113,7 @@ class World:
 
         for i in self.agents:
             if i.alive:
-                agents_nearby = self.coord_agent_view(i.coords[0], i.coords[1])
+                agents_nearby = self.coord_agent_view(i.coords[0], i.coords[1], i)
                 self.reproduction(i, agents_nearby)
 
                 view = self.coord_food_view(i.coords[0], i.coords[1])
@@ -127,7 +129,7 @@ class World:
 
         self.draw_hud()
 
-        root.after(400, lambda: self.tick(root))
+        root.after(10, lambda: self.tick(root))
 
     # AGENT REPRODUCTION SHOULD BE SEPERATED INTO CLASS LATER
 
@@ -135,7 +137,7 @@ class World:
         if agent.is_ready_to_reproduce():
             ready_to_reproduce_agents: list[Agent] = []
             for i in agents_nearby:
-                if i.is_ready_to_reproduce:
+                if i.is_ready_to_reproduce():
                     ready_to_reproduce_agents.append(i)
             if ready_to_reproduce_agents:
                 other_agent = rnd.choice(ready_to_reproduce_agents)
@@ -145,6 +147,8 @@ class World:
                 spawn_pos = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
                 a = Agent()
                 a.place_on_coords(
-                    agent.coords[0] + spawn_pos[0], agent.coords[1] + spawn_pos[1]
+                    agent.coords[0] + spawn_pos[0],
+                    agent.coords[1] + spawn_pos[1],
+                    (self.width, self.height),
                 )
                 self.agents.append(a)

@@ -19,10 +19,13 @@ class Agent:
         self.coords = rnd.randint(0, w - 1), rnd.randint(0, h - 1)
 
     # additonal note, messy system, but if was "born" start with 10 energy and bigger reproduction_cooldown
-    def place_on_coords(self, x, y) -> None:
-        self.coords = (x, y)
+    def place_on_coords(self, x, y, size: tuple[int, int]) -> None:
+        w, h = size
+        nx = clamp(x, 0, w - 1)
+        ny = clamp(y, 0, h - 1)
+        self.coords = (nx, ny)
         self.energy = 10
-        self.reproduction_cooldown = 20
+        self.reproduction_cooldown = 10
 
     def step(self, size: tuple[int, int], view: dict[tuple[int, int], int]) -> None:
         self.ate = False
@@ -74,7 +77,7 @@ class Agent:
         self.coords = (clamp(x + dx, 0, w - 1), clamp(y + dy, 0, h - 1))
 
     def death(self):
-        if self.energy <= 0 or self.age > 100:
+        if self.energy <= 0 or self.age > 200:
             self.alive = False
 
     # ask world how much food there is in the current cell
@@ -84,7 +87,7 @@ class Agent:
 
     # de cides direction to move to
     def decide(self, view: dict[tuple[int, int], int]):
-        if view[0, 0] > 0:
+        if view[0, 0] > 0 and self.energy < self.max_energy:
             return (0, 0)
         has_food: list[tuple[int, int]] = [
             (dx, dy) for (dx, dy), amt in view.items() if amt > 0
@@ -95,9 +98,7 @@ class Agent:
         return rnd.choice([(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)])
 
     def is_ready_to_reproduce(self) -> bool:
-        if self.alive and self.energy > 14 and self.reproduction_cooldown == 0:
-            return True
-        return False
+        return self.alive and self.energy > 14 and self.reproduction_cooldown == 0
 
     def reproduce(self) -> None:
         self.energy -= 5

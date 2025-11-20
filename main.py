@@ -4,8 +4,8 @@ import tkinter as tk
 import random as rnd
 from world import World
 
-GRID_W = 20
-GRID_H = 12
+GRID_W = 30
+GRID_H = 16
 CELL = 32
 SEED = 42
 
