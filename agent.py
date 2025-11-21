@@ -13,6 +13,7 @@ class Agent:
         self.ate = False
         self.age = 0
         self.reproduction_cooldown = 10
+        self.death_time = 0
 
     def place_random(self, size: tuple[int, int]) -> None:
         w, h = size

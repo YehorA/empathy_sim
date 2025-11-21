@@ -125,11 +125,15 @@ class World:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
                 i.draw(self.canvas, self.cell)
             else:
+                i.death_time += 1
                 i.draw(self.canvas, self.cell)
+                # if dead for more then 10 ticks remove from the list
+                if i.death_time > 10:
+                    self.agents.remove(i)
 
         self.draw_hud()
 
-        root.after(10, lambda: self.tick(root))
+        root.after(100, lambda: self.tick(root))
 
     # AGENT REPRODUCTION SHOULD BE SEPERATED INTO CLASS LATER
 
