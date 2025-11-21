@@ -83,3 +83,45 @@ class StatsWindow:
         # draw food (cyan)
         for (x1, y1), (x2, y2) in zip(food_points, food_points[1:]):
             self.canvas.create_line(x1, y1, x2, y2, fill="#7aec4d", tags="graph")
+
+        # -------------- Legend ---------------
+        legend_x = 10
+        legend_y = self.height - 20
+
+        self.canvas.create_rectangle(
+            legend_x,
+            legend_y,
+            legend_x + 10,
+            legend_y + 10,
+            fill="#2457e4",
+            outline="",
+            tags="graph",
+        )
+
+        self.canvas.create_text(
+            legend_x + 20,
+            legend_y + 5,
+            text="Alive",
+            anchor="w",
+            fill="#ffffff",
+            tags="graph",
+        )
+
+        self.canvas.create_rectangle(
+            legend_x + 80,
+            legend_y,
+            legend_x + 90,
+            legend_y + 10,
+            fill="#7aec4d",
+            outline="",
+            tags="graph",
+        )
+
+        self.canvas.create_text(
+            legend_x + 100,
+            legend_y + 5,
+            text="Food",
+            anchor="w",
+            fill="#ffffff",
+            tags="graph",
+        )
