@@ -15,9 +15,9 @@ class World:
         self.agents: list[Agent] = []
 
         # some info for the graph and statistics
-        self.tick_count: int
+        self.tick_count = 0
         # (tick, alive, total_food)
-        self.history: list[tuple[int, int, int]]
+        self.history: list[tuple[int, int, int]] = []
 
     def count_alive(self) -> int:
         count = 0
@@ -116,7 +116,13 @@ class World:
 
         self.canvas.delete("agent")
 
+        alive_of_recent = []
         for i in self.agents:
+            if not i.alive:
+                i.death_time += 1
+                # if dead for more then 10 ticks remove from the list
+                if i.death_time > 10:
+                    continue
             if i.alive:
                 agents_nearby = self.coord_agent_view(i.coords[0], i.coords[1], i)
                 self.reproduction(i, agents_nearby)
@@ -126,15 +132,18 @@ class World:
                 if i.ate:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
                 i.draw(self.canvas, self.cell)
-            else:
-                i.death_time += 1
-                i.draw(self.canvas, self.cell)
-                # if dead for more then 10 ticks remove from the list
-                if i.death_time > 10:
-                    self.agents.remove(i)
+            alive_of_recent.append(i)
+
+        self.agents = alive_of_recent
+        # else:
+        #     i.death_time += 1
+        #     i.draw(self.canvas, self.cell)
+        #     if i.death_time > 10:
+        #         self.agents.remove(i)
 
         # self.draw_hud()
 
+        self.record_step_stats()
         stats.update(self)
 
         root.after(100, lambda: self.tick(root, stats))
