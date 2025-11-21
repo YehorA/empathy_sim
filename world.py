@@ -14,6 +14,11 @@ class World:
         self.food = Food(width, height, max_food=5)
         self.agents: list[Agent] = []
 
+        # some info for the graph and statistics
+        self.tick_count: int
+        # (tick, alive, total_food)
+        self.history: list[tuple[int, int, int]]
+
     def count_alive(self) -> int:
         count = 0
         for i in self.agents:
@@ -32,30 +37,30 @@ class World:
         return sum / alive
 
     # Draw simple stats of the simulation
-    def draw_hud(self) -> None:
-        self.canvas.delete("hud")
-        alive = self.count_alive()
-        avg_energy = self.average_energy()
+    # def draw_hud(self) -> None:
+    #     self.canvas.delete("hud")
+    #     alive = self.count_alive()
+    #     avg_energy = self.average_energy()
 
-        self.canvas.create_text(
-            10,
-            10,
-            text=f"Alive: {alive}",
-            fill="#fffc4f",
-            anchor="nw",
-            tags="hud",
-            font=("Helvetica", 12),
-        )
+    #     self.canvas.create_text(
+    #         10,
+    #         10,
+    #         text=f"Alive: {alive}",
+    #         fill="#fffc4f",
+    #         anchor="nw",
+    #         tags="hud",
+    #         font=("Helvetica", 12),
+    #     )
 
-        self.canvas.create_text(
-            10,
-            30,
-            text=f"Avg energy: {avg_energy}",
-            fill="#fffc4f",
-            anchor="nw",
-            tags="hud",
-            font=("Helvetica", 12),
-        )
+    #     self.canvas.create_text(
+    #         10,
+    #         30,
+    #         text=f"Avg energy: {avg_energy}",
+    #         fill="#fffc4f",
+    #         anchor="nw",
+    #         tags="hud",
+    #         font=("Helvetica", 12),
+    #     )
 
     def draw_grid(self) -> None:
         for i in range(self.width + 1):
@@ -104,7 +109,7 @@ class World:
                     agents_near.append(i)
         return agents_near
 
-    def tick(self, root: tk.Tk) -> None:
+    def tick(self, root: tk.Tk, stats) -> None:
         self.food.regrow_step(p=0.03)
         self.canvas.delete("food")
         self.food.draw(self.canvas, self.cell)
@@ -117,9 +122,6 @@ class World:
                 self.reproduction(i, agents_nearby)
 
                 view = self.coord_food_view(i.coords[0], i.coords[1])
-                # if agent found any food at the cell, it took one food from the cell
-                # if i.there_is_food and i.energy < i.max_energy:
-                #     self.food.take_at(i.coords[0], i.coords[1], 1)
                 i.step((self.width, self.height), view)
                 if i.ate:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
@@ -131,9 +133,18 @@ class World:
                 if i.death_time > 10:
                     self.agents.remove(i)
 
-        self.draw_hud()
+        # self.draw_hud()
 
-        root.after(100, lambda: self.tick(root))
+        stats.update(self)
+
+        root.after(100, lambda: self.tick(root, stats))
+
+    def record_step_stats(self) -> None:
+        # after everything done, update some statistics
+        self.tick_count += 1
+        alive = self.count_alive()
+        total_food = sum(self.food.foods.values())
+        self.history.append((self.tick_count, alive, total_food))
 
     # AGENT REPRODUCTION SHOULD BE SEPERATED INTO CLASS LATER
 

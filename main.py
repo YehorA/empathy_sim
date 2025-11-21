@@ -3,6 +3,7 @@
 import tkinter as tk
 import random as rnd
 from world import World
+from stats_window import StatsWindow
 
 GRID_W = 30
 GRID_H = 16
@@ -28,7 +29,10 @@ def main() -> None:
     world = World(GRID_W, GRID_H, CELL, canvas)
     world.draw_grid()
     world.spawn()
-    world.tick(root)
+
+    stats = StatsWindow(root)
+
+    world.tick(root, stats)
 
     root.mainloop()
 
