@@ -16,13 +16,27 @@ class World:
 
         # some info for the graph and statistics
         self.tick_count = 0
-        # (tick, alive, total_food)
-        self.history: list[tuple[int, int, int]] = []
+        # (tick, alive, total_food, empathy_alive, selfish_alive)
+        self.history: list[tuple[int, int, int, int, int]] = []
 
     def count_alive(self) -> int:
         count = 0
         for i in self.agents:
             if i.alive:
+                count += 1
+        return count
+
+    def count_alive_emphatic(self) -> int:
+        count = 0
+        for i in self.agents:
+            if i.alive and i.empathy:
+                count += 1
+        return count
+
+    def count_alive_selfish(self) -> int:
+        count = 0
+        for i in self.agents:
+            if i.alive and not i.empathy:
                 count += 1
         return count
 
@@ -80,9 +94,14 @@ class World:
         self.food.draw(self.canvas, self.cell)
 
         # agent spawn
-        for _ in range(20):
+        for _ in range(10):
             a = Agent()
             a.place_random((self.width, self.height))
+            self.agents.append(a)
+        for _ in range(10):
+            a = Agent()
+            a.place_random((self.width, self.height))
+            a.empathy = False
             self.agents.append(a)
 
     def coord_food_view(self, x, y) -> dict[tuple[int, int], int]:
@@ -126,6 +145,7 @@ class World:
             if i.alive:
                 agents_nearby = self.coord_agent_view(i.coords[0], i.coords[1], i)
                 self.reproduction(i, agents_nearby)
+                self.help_other_agent(i, agents_nearby)
 
                 view = self.coord_food_view(i.coords[0], i.coords[1])
                 i.step((self.width, self.height), view)
@@ -153,7 +173,12 @@ class World:
         self.tick_count += 1
         alive = self.count_alive()
         total_food = sum(self.food.foods.values())
-        self.history.append((self.tick_count, alive, total_food))
+
+        alive_emphatic = self.count_alive_emphatic()
+        alive_selfish = self.count_alive_selfish()
+        self.history.append(
+            (self.tick_count, alive, total_food, alive_emphatic, alive_selfish)
+        )
 
     # AGENT REPRODUCTION SHOULD BE SEPERATED INTO CLASS LATER
 
@@ -170,9 +195,28 @@ class World:
 
                 spawn_pos = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
                 a = Agent()
+
+                if agent.empathy and other_agent.empathy:
+                    a.empathy = True
+                elif agent.empathy or other_agent:
+                    a.empathy = rnd.choice([True, False])
+                else:
+                    a.empathy = False
+
                 a.place_on_coords(
                     agent.coords[0] + spawn_pos[0],
                     agent.coords[1] + spawn_pos[1],
                     (self.width, self.height),
                 )
                 self.agents.append(a)
+
+    def help_other_agent(self, agent: Agent, agents_nearby: list[Agent]) -> None:
+        if agent.empathy and agent.energy > 14:
+            need_help_agents: list[Agent] = []
+            for i in agents_nearby:
+                if i.alive and i.energy < 5:
+                    need_help_agents.append(i)
+            if need_help_agents:
+                other_agent = rnd.choice(need_help_agents)
+                agent.energy -= 4
+                other_agent.energy += 4

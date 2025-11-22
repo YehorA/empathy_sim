@@ -31,15 +31,25 @@ class StatsWindow:
         self.label_avg_energy = tk.Label(self.window, text="Abg energy: 0.0")
         self.label_avg_energy.pack(anchor="w", padx=10, pady=5)
 
+        self.label_emphatic_alive = tk.Label(self.window, text="Emphatic alive: 0")
+        self.label_emphatic_alive.pack(anchor="w", padx=10, pady=5)
+
+        self.label_selfish_alive = tk.Label(self.window, text="Selfish alive: 0")
+        self.label_selfish_alive.pack(anchor="w", padx=10, pady=5)
+
     def update(self, world: "World") -> None:
         # ------------ Stat Labels ------------------
 
         tick = getattr(world, "tick_count", 0)
         alive_now = world.count_alive()
         avg_energy = world.average_energy()
+        alive_emphatic_now = world.count_alive_emphatic()
+        alive_selfish_now = world.count_alive_selfish()
         self.label_tick.config(text=f"Tick: {tick}")
         self.label_alive.config(text=f"Alive: {alive_now}")
         self.label_avg_energy.config(text=f"Abg energy: {avg_energy:.1f}")
+        self.label_emphatic_alive.config(text=f"Emphatic_alive: {alive_emphatic_now}")
+        self.label_selfish_alive.config(text=f"Selfish_alive: {alive_selfish_now}")
 
         # ------------ Graph ------------------
         self.canvas.delete("graph")
@@ -53,7 +63,9 @@ class StatsWindow:
         history = history[-max_points:]
 
         # unpack history
-        _, alive_series, food_series = zip(*history)
+        _, alive_series, food_series, alive_emphatic_series, alive_selfish_series = zip(
+            *history
+        )
 
         food_series = [f / 10 for f in food_series]
 
@@ -76,13 +88,27 @@ class StatsWindow:
         alive_points = [to_canvas(i, v) for i, v in enumerate(alive_series)]
         food_points = [to_canvas(i, v) for i, v in enumerate(food_series)]
 
+        alive_emphatic_points = [
+            to_canvas(i, v) for i, v in enumerate(alive_emphatic_series)
+        ]
+        alive_selfish_points = [
+            to_canvas(i, v) for i, v in enumerate(alive_selfish_series)
+        ]
+
         # draw alive (yellow)
         for (x1, y1), (x2, y2) in zip(alive_points, alive_points[1:]):
-            self.canvas.create_line(x1, y1, x2, y2, fill="#2457e4", tags="graph")
+            self.canvas.create_line(x1, y1, x2, y2, fill="#3ae424", tags="graph")
 
         # draw food (cyan)
         for (x1, y1), (x2, y2) in zip(food_points, food_points[1:]):
-            self.canvas.create_line(x1, y1, x2, y2, fill="#7aec4d", tags="graph")
+            self.canvas.create_line(x1, y1, x2, y2, fill="#ec4d4d", tags="graph")
+
+        for (x1, y1), (x2, y2) in zip(alive_emphatic_points, alive_emphatic_points[1:]):
+            self.canvas.create_line(x1, y1, x2, y2, fill="#2457e4", tags="graph")
+
+        # draw food (cyan)
+        for (x1, y1), (x2, y2) in zip(alive_selfish_points, alive_selfish_points[1:]):
+            self.canvas.create_line(x1, y1, x2, y2, fill="#dcec4d", tags="graph")
 
         # -------------- Legend ---------------
         legend_x = 10

@@ -15,6 +15,8 @@ class Agent:
         self.reproduction_cooldown = 10
         self.death_time = 0
 
+        self.empathy = True
+
     def place_random(self, size: tuple[int, int]) -> None:
         w, h = size
         self.coords = rnd.randint(0, w - 1), rnd.randint(0, h - 1)
@@ -48,9 +50,12 @@ class Agent:
         t = self.energy / self.max_energy
         t = max(0.0, min(t, 1.0))
 
-        low_rgb = (16, 16, 64)
-        high_rgb = (80, 180, 255)
-
+        if self.empathy:
+            low_rgb = (16, 16, 64)
+            high_rgb = (80, 180, 255)
+        else:
+            low_rgb = (255, 255, 223)
+            high_rgb = (248, 255, 27)
         r = int(low_rgb[0] + t * (high_rgb[0] - low_rgb[0]))
         g = int(low_rgb[1] + t * (high_rgb[1] - low_rgb[1]))
         b = int(low_rgb[2] + t * (high_rgb[2] - low_rgb[2]))
