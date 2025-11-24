@@ -112,42 +112,33 @@ class StatsWindow:
 
         # -------------- Legend ---------------
         legend_x = 10
-        legend_y = self.height - 20
+        legend_y = self.height - 70  # give more space
 
-        self.canvas.create_rectangle(
-            legend_x,
-            legend_y,
-            legend_x + 10,
-            legend_y + 10,
-            fill="#2457e4",
-            outline="",
-            tags="graph",
-        )
+        items = [
+            ("Alive", "#3ae424"),
+            ("Food", "#ec4d4d"),
+            ("Empathic alive", "#2457e4"),
+            ("Selfish alive", "#dcec4d"),
+        ]
 
-        self.canvas.create_text(
-            legend_x + 20,
-            legend_y + 5,
-            text="Alive",
-            anchor="w",
-            fill="#ffffff",
-            tags="graph",
-        )
+        for idx, (label, color) in enumerate(items):
+            y = legend_y + idx * 15
 
-        self.canvas.create_rectangle(
-            legend_x + 80,
-            legend_y,
-            legend_x + 90,
-            legend_y + 10,
-            fill="#7aec4d",
-            outline="",
-            tags="graph",
-        )
+            self.canvas.create_rectangle(
+                legend_x,
+                y,
+                legend_x + 10,
+                y + 10,
+                fill=color,
+                outline="",
+                tags="graph",
+            )
 
-        self.canvas.create_text(
-            legend_x + 100,
-            legend_y + 5,
-            text="Food",
-            anchor="w",
-            fill="#ffffff",
-            tags="graph",
-        )
+            self.canvas.create_text(
+                legend_x + 20,
+                y + 5,
+                text=label,
+                anchor="w",
+                fill="#ffffff",
+                tags="graph",
+            )
