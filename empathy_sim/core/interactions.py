@@ -1,9 +1,12 @@
+from typing import TYPE_CHECKING
 from empathy_sim.core.agent import Agent
-from empathy_sim.core.world import World
 import random as rnd
 
+if TYPE_CHECKING:
+    from empathy_sim.core.world import World
 
-def reproduction(world: World, agent: Agent, agents_nearby: list[Agent]) -> None:
+
+def reproduction(world: "World", agent: Agent, agents_nearby: list[Agent]) -> None:
     if agent.is_ready_to_reproduce():
         ready_to_reproduce_agents: list[Agent] = []
         for i in agents_nearby:
