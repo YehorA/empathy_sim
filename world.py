@@ -19,36 +19,26 @@ class World:
         # (tick, alive, total_food, empathy_alive, selfish_alive)
         self.history: list[tuple[int, int, int, int, int]] = []
 
+    # -----------------------------------------------------------------------------------
+    @property
+    def alive_agents(self) -> list[Agent]:
+        return [a for a in self.agents if a.alive]
+
+    # -----------------------------------------------------------------------------------
+
     def count_alive(self) -> int:
-        count = 0
-        for i in self.agents:
-            if i.alive:
-                count += 1
-        return count
+        return len(self.alive_agents)
 
     def count_alive_emphatic(self) -> int:
-        count = 0
-        for i in self.agents:
-            if i.alive and i.empathy:
-                count += 1
-        return count
+        return sum(1 for a in self.alive_agents if a.empathy)
 
     def count_alive_selfish(self) -> int:
-        count = 0
-        for i in self.agents:
-            if i.alive and not i.empathy:
-                count += 1
-        return count
+        return sum(1 for a in self.alive_agents if not a.empathy)
 
     def average_energy(self) -> float:
-        total_energy = 0
-        alive = self.count_alive()
-        for i in self.agents:
-            if i.alive:
-                total_energy += i.energy
-        if alive == 0:
+        if not self.alive_agents:
             return 0.0
-        return total_energy / alive
+        return sum(a.energy for a in self.alive_agents) / len(self.alive_agents)
 
     def draw_grid(self) -> None:
         for i in range(self.width + 1):
@@ -124,7 +114,6 @@ class World:
                 i.step((self.width, self.height), view)
                 if i.ate:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
-                # i.draw(self.canvas, self.cell)
             alive_of_recent.append(i)
         self.agents = alive_of_recent
 
@@ -143,6 +132,8 @@ class World:
         self.record_step_stats()
         stats.update(self)
         root.after(100, lambda: self.tick(root, stats))
+
+    # -----------------------------------------------------------
 
     def record_step_stats(self) -> None:
         # after everything done, update some statistics
