@@ -1,3 +1,8 @@
+from typing import Sequence
+from empathy_sim.core.food import Food
+from empathy_sim.core.agent import Agent
+
+
 class Renderer:
     def __init__(self, canvas, width, height, cell):
         self.canvas = canvas
@@ -18,7 +23,8 @@ class Renderer:
             )
 
     # handles visuals for "tick"
-    def render(self, food, agents) -> None:
+
+    def render(self, food: Food, agents: Sequence[Agent]) -> None:
         self.canvas.delete("food")
         food.draw(self.canvas, self.cell)
 

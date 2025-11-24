@@ -2,7 +2,7 @@ import tkinter as tk
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from world import World
+    from empathy_sim.core.world import World
 
 
 class StatsWindow:

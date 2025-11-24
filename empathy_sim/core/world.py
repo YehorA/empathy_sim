@@ -1,15 +1,13 @@
-import tkinter as tk
-from food import Food
-from agent import Agent
-from utils import clamp
+from empathy_sim.core.food import Food
+from empathy_sim.core.agent import Agent
+from empathy_sim.core.utils import clamp
 import random as rnd
 
 
 class World:
-    def __init__(self, width, height, cell):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.cell = cell
         self.food = Food(width, height, max_food=5)
         self.agents: list[Agent] = []
 

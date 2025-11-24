@@ -1,6 +1,6 @@
 import tkinter as tk
 import random as rnd
-from utils import clamp
+from empathy_sim.core.utils import clamp
 
 
 class Agent:

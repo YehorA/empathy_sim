@@ -2,10 +2,10 @@
 
 import tkinter as tk
 import random as rnd
-from world import World
-from renderer import Renderer
-from stats_window import StatsWindow
-from version import __verison__
+from empathy_sim.core.world import World
+from empathy_sim.ui.renderer import Renderer
+from empathy_sim.ui.stats_window import StatsWindow
+from empathy_sim.version import __verison__
 
 GRID_W = 30
 GRID_H = 16
@@ -38,7 +38,7 @@ def main() -> None:
 
     renderer = Renderer(canvas, GRID_W, GRID_H, CELL)
 
-    world = World(GRID_W, GRID_H, CELL)
+    world = World(GRID_W, GRID_H)
     renderer.draw_grid()
     world.spawn()
 
