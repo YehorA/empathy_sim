@@ -50,32 +50,6 @@ class World:
             return 0.0
         return sum / alive
 
-    # Draw simple stats of the simulation
-    # def draw_hud(self) -> None:
-    #     self.canvas.delete("hud")
-    #     alive = self.count_alive()
-    #     avg_energy = self.average_energy()
-
-    #     self.canvas.create_text(
-    #         10,
-    #         10,
-    #         text=f"Alive: {alive}",
-    #         fill="#fffc4f",
-    #         anchor="nw",
-    #         tags="hud",
-    #         font=("Helvetica", 12),
-    #     )
-
-    #     self.canvas.create_text(
-    #         10,
-    #         30,
-    #         text=f"Avg energy: {avg_energy}",
-    #         fill="#fffc4f",
-    #         anchor="nw",
-    #         tags="hud",
-    #         font=("Helvetica", 12),
-    #     )
-
     def draw_grid(self) -> None:
         for i in range(self.width + 1):
             X = i * self.cell
@@ -198,7 +172,7 @@ class World:
 
                 if agent.empathy and other_agent.empathy:
                     a.empathy = True
-                elif agent.empathy or other_agent:
+                elif agent.empathy or other_agent.empathy:
                     a.empathy = rnd.choice([True, False])
                 else:
                     a.empathy = False

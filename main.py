@@ -4,6 +4,7 @@ import tkinter as tk
 import random as rnd
 from world import World
 from stats_window import StatsWindow
+from version import __verison__
 
 GRID_W = 30
 GRID_H = 16
@@ -15,7 +16,7 @@ def main() -> None:
     rnd.seed(SEED)
 
     root = tk.Tk()
-    root.title("empathy_sim — 0.1")
+    root.title(f"empathy_sim — {__verison__}")
 
     canvas = tk.Canvas(
         root,
