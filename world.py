@@ -41,14 +41,14 @@ class World:
         return count
 
     def average_energy(self) -> float:
-        sum = 0
+        total_energy = 0
         alive = self.count_alive()
         for i in self.agents:
             if i.alive:
-                sum += i.energy
+                total_energy += i.energy
         if alive == 0:
             return 0.0
-        return sum / alive
+        return total_energy / alive
 
     def draw_grid(self) -> None:
         for i in range(self.width + 1):
@@ -102,12 +102,11 @@ class World:
                     agents_near.append(i)
         return agents_near
 
-    def tick(self, root: tk.Tk, stats) -> None:
-        self.food.regrow_step(p=0.03)
-        self.canvas.delete("food")
-        self.food.draw(self.canvas, self.cell)
+    # -----------------------------------------------------------
 
-        self.canvas.delete("agent")
+    # handles logic for "tick"
+    def step(self) -> None:
+        self.food.regrow_step(p=0.03)
 
         alive_of_recent = []
         for i in self.agents:
@@ -125,21 +124,24 @@ class World:
                 i.step((self.width, self.height), view)
                 if i.ate:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
-                i.draw(self.canvas, self.cell)
+                # i.draw(self.canvas, self.cell)
             alive_of_recent.append(i)
-
         self.agents = alive_of_recent
-        # else:
-        #     i.death_time += 1
-        #     i.draw(self.canvas, self.cell)
-        #     if i.death_time > 10:
-        #         self.agents.remove(i)
 
-        # self.draw_hud()
+    # handles visuals for "tick"
+    def render(self) -> None:
+        self.canvas.delete("food")
+        self.food.draw(self.canvas, self.cell)
 
+        self.canvas.delete("agent")
+        for agent in self.agents:
+            agent.draw(self.canvas, self.cell)
+
+    def tick(self, root: tk.Tk, stats) -> None:
+        self.step()
+        self.render()
         self.record_step_stats()
         stats.update(self)
-
         root.after(100, lambda: self.tick(root, stats))
 
     def record_step_stats(self) -> None:
