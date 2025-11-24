@@ -36,9 +36,10 @@ class World:
         return sum(1 for a in self.alive_agents if not a.empathy)
 
     def average_energy(self) -> float:
-        if not self.alive_agents:
+        alive = self.alive_agents
+        if not alive:
             return 0.0
-        return sum(a.energy for a in self.alive_agents) / len(self.alive_agents)
+        return sum(a.energy for a in alive) / len(alive)
 
     def draw_grid(self) -> None:
         for i in range(self.width + 1):
@@ -125,13 +126,6 @@ class World:
         self.canvas.delete("agent")
         for agent in self.agents:
             agent.draw(self.canvas, self.cell)
-
-    def tick(self, root: tk.Tk, stats) -> None:
-        self.step()
-        self.render()
-        self.record_step_stats()
-        stats.update(self)
-        root.after(100, lambda: self.tick(root, stats))
 
     # -----------------------------------------------------------
 

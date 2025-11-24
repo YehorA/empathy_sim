@@ -12,6 +12,14 @@ CELL = 32
 SEED = 42
 
 
+def tick(root: tk.Tk, stats: StatsWindow, world: World) -> None:
+    world.step()
+    world.render()
+    world.record_step_stats()
+    stats.update(world)
+    root.after(100, tick, root, stats, world)
+
+
 def main() -> None:
     rnd.seed(SEED)
 
@@ -33,7 +41,7 @@ def main() -> None:
 
     stats = StatsWindow(root)
 
-    world.tick(root, stats)
+    tick(root, stats, world)
 
     root.mainloop()
 
