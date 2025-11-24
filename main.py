@@ -3,6 +3,7 @@
 import tkinter as tk
 import random as rnd
 from world import World
+from renderer import Renderer
 from stats_window import StatsWindow
 from version import __verison__
 
@@ -12,12 +13,12 @@ CELL = 32
 SEED = 42
 
 
-def tick(root: tk.Tk, stats: StatsWindow, world: World) -> None:
+def tick(root: tk.Tk, stats: StatsWindow, world: World, renderer: Renderer) -> None:
     world.step()
-    world.render()
+    renderer.render(world.food, world.agents)
     world.record_step_stats()
     stats.update(world)
-    root.after(100, tick, root, stats, world)
+    root.after(100, tick, root, stats, world, renderer)
 
 
 def main() -> None:
@@ -35,13 +36,15 @@ def main() -> None:
     )
     canvas.pack()
 
-    world = World(GRID_W, GRID_H, CELL, canvas)
-    world.draw_grid()
+    renderer = Renderer(canvas, GRID_W, GRID_H, CELL)
+
+    world = World(GRID_W, GRID_H, CELL)
+    renderer.draw_grid()
     world.spawn()
 
     stats = StatsWindow(root)
 
-    tick(root, stats, world)
+    tick(root, stats, world, renderer)
 
     root.mainloop()
 

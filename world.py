@@ -6,11 +6,10 @@ import random as rnd
 
 
 class World:
-    def __init__(self, width, height, cell, canvas):
+    def __init__(self, width, height, cell):
         self.width = width
         self.height = height
         self.cell = cell
-        self.canvas = canvas
         self.food = Food(width, height, max_food=5)
         self.agents: list[Agent] = []
 
@@ -41,22 +40,10 @@ class World:
             return 0.0
         return sum(a.energy for a in alive) / len(alive)
 
-    def draw_grid(self) -> None:
-        for i in range(self.width + 1):
-            X = i * self.cell
-            self.canvas.create_line(
-                X, 0, X, self.height * self.cell, fill="#333", tags="grid"
-            )
-        for i in range(self.height + 1):
-            Y = i * self.cell
-            self.canvas.create_line(
-                0, Y, self.width * self.cell, Y, fill="#333", tags="grid"
-            )
-
     def spawn(self) -> None:
         # food spawn
         self.food.randomize(0, 3)
-        self.food.draw(self.canvas, self.cell)
+        # self.food.draw(self.canvas, self.cell)
 
         # agent spawn
         for _ in range(10):
@@ -117,15 +104,6 @@ class World:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
             alive_of_recent.append(i)
         self.agents = alive_of_recent
-
-    # handles visuals for "tick"
-    def render(self) -> None:
-        self.canvas.delete("food")
-        self.food.draw(self.canvas, self.cell)
-
-        self.canvas.delete("agent")
-        for agent in self.agents:
-            agent.draw(self.canvas, self.cell)
 
     # -----------------------------------------------------------
 
