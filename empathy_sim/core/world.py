@@ -2,13 +2,18 @@ from empathy_sim.core.food import Food
 from empathy_sim.core.agent import Agent
 from empathy_sim.core.utils import clamp
 from empathy_sim.core.interactions import reproduction, help_other_agent
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from empathy_sim.config import SimConfig
 
 
 class World:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.food = Food(width, height, max_food=5)
+    def __init__(self, config: "SimConfig"):
+        self.config = config
+        self.width = self.config.grid_w
+        self.height = self.config.grid_h
+        self.food = Food(self.width, self.height, max_food=self.config.max_food)
         self.agents: list[Agent] = []
 
     # -----------------------------------------------------------------------------------
@@ -35,16 +40,18 @@ class World:
 
     def spawn(self) -> None:
         # food spawn
-        self.food.randomize(0, 3)
-        # self.food.draw(self.canvas, self.cell)
+        self.food.randomize(
+            self.config.min_starting_food_per_cell,
+            self.config.max_starting_food_per_cell,
+        )
 
         # agent spawn
-        for _ in range(10):
-            a = Agent()
+        for _ in range(self.config.spawn_emphatic):
+            a = Agent(self.config)
             a.place_random((self.width, self.height))
             self.agents.append(a)
-        for _ in range(10):
-            a = Agent()
+        for _ in range(self.config.spawn_selfish):
+            a = Agent(self.config)
             a.place_random((self.width, self.height))
             a.empathy = False
             self.agents.append(a)
@@ -77,19 +84,19 @@ class World:
 
     # handles logic for "tick"
     def step(self) -> None:
-        self.food.regrow_step(p=0.03)
+        self.food.regrow_step(p=self.config.food_regrow_prob)
 
         alive_of_recent = []
         for i in self.agents:
             if not i.alive:
                 i.death_time += 1
-                # if dead for more then 10 ticks remove from the list
-                if i.death_time > 10:
+                # if dead for more then death_time ticks remove from the list
+                if i.death_time > self.config.ticks_to_remove_corpse:
                     continue
             if i.alive:
                 agents_nearby = self.coord_agent_view(i.coords[0], i.coords[1], i)
                 reproduction(self, i, agents_nearby)
-                help_other_agent(i, agents_nearby)
+                help_other_agent(self, i, agents_nearby)
 
                 view = self.coord_food_view(i.coords[0], i.coords[1])
                 i.step((self.width, self.height), view)

@@ -6,12 +6,8 @@ from empathy_sim.core.world import World
 from empathy_sim.ui.renderer import Renderer
 from empathy_sim.ui.stats_window import StatsWindow
 from empathy_sim.core.stats_recorder import StatsRecorder
+from empathy_sim.config import SimConfig
 from empathy_sim.version import __verison__
-
-GRID_W = 30
-GRID_H = 16
-CELL = 32
-SEED = 42
 
 
 def tick(
@@ -29,23 +25,30 @@ def tick(
 
 
 def main() -> None:
-    rnd.seed(SEED)
+    config = SimConfig()
+
+    seed = config.seed
+    grid_w = config.grid_w
+    grid_h = config.grid_h
+    cell = config.cell
+
+    rnd.seed(seed)
 
     root = tk.Tk()
     root.title(f"empathy_sim — {__verison__}")
 
     canvas = tk.Canvas(
         root,
-        width=GRID_W * CELL,
-        height=GRID_H * CELL,
+        width=grid_w * cell,
+        height=grid_h * cell,
         bg="#0f0f0f",
         highlightthickness=0,
     )
     canvas.pack()
 
-    renderer = Renderer(canvas, GRID_W, GRID_H, CELL)
+    renderer = Renderer(canvas, grid_w, grid_h, cell)
 
-    world = World(GRID_W, GRID_H)
+    world = World(config)
     renderer.draw_grid()
     world.spawn()
 

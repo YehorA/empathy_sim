@@ -1,18 +1,23 @@
 import tkinter as tk
 import random as rnd
 from empathy_sim.core.utils import clamp
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from empathy_sim.config import SimConfig
 
 
 class Agent:
-    def __init__(self, x=0, y=0):
+    def __init__(self, config: "SimConfig", x: int = 0, y: int = 0):
+        self.cfg = config
         self.coords = (x, y)
-        self.energy = 20
+        self.energy = self.cfg.default_starting_energy
         self.alive = True
         self.there_is_food = False
-        self.max_energy = 20
+        self.max_energy = self.cfg.max_energy
         self.ate = False
-        self.age = 0
-        self.reproduction_cooldown = 10
+        self.age = self.cfg.starting_age
+        self.reproduction_cooldown = self.cfg.default_reproduction_cooldown
         self.death_time = 0
 
         self.empathy = True
@@ -21,14 +26,14 @@ class Agent:
         w, h = size
         self.coords = rnd.randint(0, w - 1), rnd.randint(0, h - 1)
 
-    # additonal note, messy system, but if was "born" start with 10 energy and bigger reproduction_cooldown
+    # additonal note, messy system, but if was "born" start with starting_energy
     def place_on_coords(self, x, y, size: tuple[int, int]) -> None:
         w, h = size
         nx = clamp(x, 0, w - 1)
         ny = clamp(y, 0, h - 1)
         self.coords = (nx, ny)
-        self.energy = 10
-        self.reproduction_cooldown = 10
+        self.energy = self.cfg.starting_energy
+        self.reproduction_cooldown = self.cfg.reproduction_cooldown
 
     def step(self, size: tuple[int, int], view: dict[tuple[int, int], int]) -> None:
         self.ate = False
@@ -72,26 +77,21 @@ class Agent:
         )
 
     def eat(self) -> None:
-        self.energy += 1
+        self.energy += self.cfg.eating_energy
         self.ate = True
 
     def move(self, size: tuple[int, int], direction: tuple[int, int]) -> None:
-        self.energy -= 1
+        self.energy -= self.cfg.movement_energy
         w, h = size
         dx, dy = direction
         x, y = self.coords
         self.coords = (clamp(x + dx, 0, w - 1), clamp(y + dy, 0, h - 1))
 
     def death(self):
-        if self.energy <= 0 or self.age > 200:
+        if self.energy <= 0 or self.age > self.cfg.maximum_age:
             self.alive = False
 
-    # ask world how much food there is in the current cell
-
-    # def is_there_food(self, food_amount: int) -> None:
-    #     self.there_is_food = food_amount > 0
-
-    # de cides direction to move to
+    # decides direction to move to
     def decide(self, view: dict[tuple[int, int], int]):
         if view[0, 0] > 0 and self.energy < self.max_energy:
             return (0, 0)
@@ -104,8 +104,12 @@ class Agent:
         return rnd.choice([(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)])
 
     def is_ready_to_reproduce(self) -> bool:
-        return self.alive and self.energy > 14 and self.reproduction_cooldown == 0
+        return (
+            self.alive
+            and self.energy > self.cfg.ready_to_reproduce_energy
+            and self.reproduction_cooldown == 0
+        )
 
     def reproduce(self) -> None:
-        self.energy -= 5
-        self.reproduction_cooldown = 20
+        self.energy -= self.cfg.how_much_energy_spent_to_reproduce
+        self.reproduction_cooldown = self.cfg.reproduction_cooldown_after_reproduction

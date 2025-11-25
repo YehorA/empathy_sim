@@ -7,6 +7,8 @@ if TYPE_CHECKING:
 
 
 def reproduction(world: "World", agent: Agent, agents_nearby: list[Agent]) -> None:
+    cfg = world.config
+
     if agent.is_ready_to_reproduce():
         ready_to_reproduce_agents: list[Agent] = []
         for i in agents_nearby:
@@ -18,7 +20,7 @@ def reproduction(world: "World", agent: Agent, agents_nearby: list[Agent]) -> No
             other_agent.reproduce()
 
             spawn_pos = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
-            a = Agent()
+            a = Agent(cfg)
 
             if agent.empathy and other_agent.empathy:
                 a.empathy = True
@@ -35,13 +37,15 @@ def reproduction(world: "World", agent: Agent, agents_nearby: list[Agent]) -> No
             world.agents.append(a)
 
 
-def help_other_agent(agent: Agent, agents_nearby: list[Agent]) -> None:
-    if agent.empathy and agent.energy > 14:
+def help_other_agent(world: "World", agent: Agent, agents_nearby: list[Agent]) -> None:
+    cfg = world.config
+
+    if agent.empathy and agent.energy > cfg.can_help_energy:
         need_help_agents: list[Agent] = []
         for i in agents_nearby:
-            if i.alive and i.energy < 5:
+            if i.alive and i.energy < cfg.need_help_energy_below:
                 need_help_agents.append(i)
         if need_help_agents:
             other_agent = rnd.choice(need_help_agents)
-            agent.energy -= 4
-            other_agent.energy += 4
+            agent.energy -= cfg.energy_to_share
+            other_agent.energy += cfg.energy_to_share
