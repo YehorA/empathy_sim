@@ -11,11 +11,6 @@ class World:
         self.food = Food(width, height, max_food=5)
         self.agents: list[Agent] = []
 
-        # some info for the graph and statistics
-        self.tick_count = 0
-        # (tick, alive, total_food, empathy_alive, selfish_alive)
-        self.history: list[tuple[int, int, int, int, int]] = []
-
     # -----------------------------------------------------------------------------------
     @property
     def alive_agents(self) -> list[Agent]:
@@ -102,17 +97,3 @@ class World:
                     self.food.take_at(i.coords[0], i.coords[1], 1)
             alive_of_recent.append(i)
         self.agents = alive_of_recent
-
-    # -----------------------------------------------------------
-
-    def record_step_stats(self) -> None:
-        # after everything done, update some statistics
-        self.tick_count += 1
-        alive = self.count_alive()
-        total_food = sum(self.food.foods.values())
-
-        alive_emphatic = self.count_alive_emphatic()
-        alive_selfish = self.count_alive_selfish()
-        self.history.append(
-            (self.tick_count, alive, total_food, alive_emphatic, alive_selfish)
-        )

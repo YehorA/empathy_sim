@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from empathy_sim.core.world import World
+    from empathy_sim.core.stats_recorder import StatsRecorder
 
 
 class StatsWindow:
@@ -37,7 +38,7 @@ class StatsWindow:
         self.label_selfish_alive = tk.Label(self.window, text="Selfish alive: 0")
         self.label_selfish_alive.pack(anchor="w", padx=10, pady=5)
 
-    def update(self, world: "World") -> None:
+    def update(self, world: "World", stats_recorder: "StatsRecorder") -> None:
         # ------------ Stat Labels ------------------
 
         tick = getattr(world, "tick_count", 0)
@@ -54,7 +55,7 @@ class StatsWindow:
         # ------------ Graph ------------------
         self.canvas.delete("graph")
 
-        history = world.history
+        history = stats_recorder.history
         if len(history) < 2:
             return
 
