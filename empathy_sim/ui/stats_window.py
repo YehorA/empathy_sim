@@ -38,20 +38,25 @@ class StatsWindow:
         self.label_selfish_alive = tk.Label(self.window, text="Selfish alive: 0")
         self.label_selfish_alive.pack(anchor="w", padx=10, pady=5)
 
-    def update(self, world: "World", stats_recorder: "StatsRecorder") -> None:
-        # ------------ Stat Labels ------------------
+    def update(self, stats_recorder: "StatsRecorder") -> None:
+        self._update_labels(stats_recorder)
+        self._update_graph(stats_recorder)
 
-        tick = getattr(world, "tick_count", 0)
-        alive_now = world.count_alive()
-        avg_energy = world.average_energy()
-        alive_emphatic_now = world.count_alive_emphatic()
-        alive_selfish_now = world.count_alive_selfish()
+    def _update_labels(self, stats_recorder: "StatsRecorder") -> None:
+        # ------------ Stat Labels ------------------
+        history = stats_recorder.history
+        if len(history) < 2:
+            return
+
+        last = stats_recorder.history[-1]
+        tick, alive_now, _, alive_emphatic_now, alive_selfish_now, avg_energy = last
         self.label_tick.config(text=f"Tick: {tick}")
         self.label_alive.config(text=f"Alive: {alive_now}")
         self.label_avg_energy.config(text=f"Abg energy: {avg_energy:.1f}")
-        self.label_emphatic_alive.config(text=f"Emphatic_alive: {alive_emphatic_now}")
-        self.label_selfish_alive.config(text=f"Selfish_alive: {alive_selfish_now}")
+        self.label_emphatic_alive.config(text=f"Emphatic alive: {alive_emphatic_now}")
+        self.label_selfish_alive.config(text=f"Selfish alive: {alive_selfish_now}")
 
+    def _update_graph(self, stats_recorder: "StatsRecorder") -> None:
         # ------------ Graph ------------------
         self.canvas.delete("graph")
 
@@ -64,8 +69,8 @@ class StatsWindow:
         history = history[-max_points:]
 
         # unpack history
-        _, alive_series, food_series, alive_emphatic_series, alive_selfish_series = zip(
-            *history
+        _, alive_series, food_series, alive_emphatic_series, alive_selfish_series, _ = (
+            zip(*history)
         )
 
         food_series = [f / 10 for f in food_series]

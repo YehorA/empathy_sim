@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 class StatsRecorder:
     def __init__(self):
         self.tick_count = 0
-        self.history: list[tuple[int, int, int, int, int]] = []
+        self.history: list[tuple[int, int, int, int, int, float]] = []
 
     def record_step_stats(self, world: "World") -> None:
         # after everything done, update some statistics
@@ -17,6 +17,14 @@ class StatsRecorder:
 
         alive_emphatic = world.count_alive_emphatic()
         alive_selfish = world.count_alive_selfish()
+        avg_energy = world.average_energy()
         self.history.append(
-            (self.tick_count, alive, total_food, alive_emphatic, alive_selfish)
+            (
+                self.tick_count,
+                alive,
+                total_food,
+                alive_emphatic,
+                alive_selfish,
+                avg_energy,
+            )
         )

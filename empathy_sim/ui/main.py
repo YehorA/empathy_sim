@@ -20,7 +20,7 @@ def tick(
     world.step()
     renderer.render(world.food, world.agents)
     stats_recorder.record_step_stats(world)
-    stats.update(world, stats_recorder)
+    stats.update(stats_recorder)
     root.after(100, tick, root, stats, world, renderer, stats_recorder)
 
 
