@@ -6,6 +6,7 @@ from empathy_sim.core.world import World
 from empathy_sim.ui.renderer import Renderer
 from empathy_sim.ui.stats_window import StatsWindow
 from empathy_sim.core.stats_recorder import StatsRecorder
+from empathy_sim.ui.setup_window import SetupWindow
 from empathy_sim.config import SimConfig
 from empathy_sim.version import __verison__
 
@@ -36,61 +37,64 @@ def tick(
 
 
 def main() -> None:
-    config = SimConfig()
-
-    seed = config.seed
-    grid_w = config.grid_w
-    grid_h = config.grid_h
-    cell = config.cell
-
-    rnd.seed(seed)
-
     root = tk.Tk()
     root.title(f"empathy_sim — {__verison__}")
+    config = SimConfig()
 
-    canvas = tk.Canvas(
-        root,
-        width=grid_w * cell,
-        height=grid_h * cell,
-        bg="#0f0f0f",
-        highlightthickness=0,
-    )
-    canvas.pack()
+    def start_sim(config: SimConfig):
 
-    controls = tk.Frame(root)
-    controls.pack(fill="x")
+        seed = config.seed
+        grid_w = config.grid_w
+        grid_h = config.grid_h
+        cell = config.cell
 
-    def toggle_pause():
-        sim_state["paused"] = not sim_state["paused"]
-        pause_button.config(text="Resume" if sim_state["paused"] else "Pause")
+        rnd.seed(seed)
 
-    pause_button = tk.Button(controls, text="Pause", command=toggle_pause)
-    pause_button.pack(side="left")
+        canvas = tk.Canvas(
+            root,
+            width=grid_w * cell,
+            height=grid_h * cell,
+            bg="#0f0f0f",
+            highlightthickness=0,
+        )
+        canvas.pack()
 
-    def on_speed_change(value: str) -> None:
-        sim_state["speed"] = float(value)
+        controls = tk.Frame(root)
+        controls.pack(fill="x")
 
-    speed_scale = tk.Scale(
-        controls,
-        from_=0.1,
-        to=2.0,
-        resolution=0.1,
-        orient="horizontal",
-        command=on_speed_change,
-    )
-    speed_scale.set(1.0)
-    speed_scale.pack(side="left")
+        def toggle_pause():
+            sim_state["paused"] = not sim_state["paused"]
+            pause_button.config(text="Resume" if sim_state["paused"] else "Pause")
 
-    renderer = Renderer(canvas, grid_w, grid_h, cell)
+        pause_button = tk.Button(controls, text="Pause", command=toggle_pause)
+        pause_button.pack(side="left")
 
-    world = World(config)
-    renderer.draw_grid()
-    world.spawn()
+        def on_speed_change(value: str) -> None:
+            sim_state["speed"] = float(value)
 
-    stats_recorder = StatsRecorder()
+        speed_scale = tk.Scale(
+            controls,
+            from_=0.1,
+            to=2.0,
+            resolution=0.1,
+            orient="horizontal",
+            command=on_speed_change,
+        )
+        speed_scale.set(1.0)
+        speed_scale.pack(side="left")
 
-    stats = StatsWindow(root)
-    tick(root, stats, world, renderer, stats_recorder)
+        renderer = Renderer(canvas, grid_w, grid_h, cell)
+
+        world = World(config)
+        renderer.draw_grid()
+        world.spawn()
+
+        stats_recorder = StatsRecorder()
+
+        stats = StatsWindow(root)
+        tick(root, stats, world, renderer, stats_recorder)
+
+    SetupWindow(root, config, on_start=start_sim)
 
     root.mainloop()
 
