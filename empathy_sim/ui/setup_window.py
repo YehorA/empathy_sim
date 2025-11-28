@@ -40,7 +40,7 @@ class SetupWindow(tk.Toplevel):
         self.config.spawn_selfish = self.starting_selfish.get()
 
         self.start_button.config(state="disabled")
-        self.on_start(self.config)
+        self.on_start()
         self.destroy()
 
     def _create_UI(self):
