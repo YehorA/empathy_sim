@@ -94,7 +94,7 @@ def main() -> None:
         stats = StatsWindow(root)
         tick(root, stats, world, renderer, stats_recorder)
 
-    SetupWindow(root, config, on_start=start_sim)
+    setup = SetupWindow(root, config, on_start=start_sim)
 
     root.mainloop()
 
