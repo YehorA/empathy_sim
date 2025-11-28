@@ -24,14 +24,19 @@ class SimApp:
         self.stats: StatsWindow | None = None
 
     def start_sim(self):
-
         seed = self.config.seed
+        rnd.seed(seed)
+
         grid_w = self.config.grid_w
         grid_h = self.config.grid_h
         cell = self.config.cell
 
-        rnd.seed(seed)
+        canvas = self._create_ui(grid_w, grid_h, cell)
+        self._create_simulation(canvas, grid_w, grid_h, cell)
 
+        self.tick()
+
+    def _create_ui(self, grid_w: int, grid_h: int, cell: int) -> tk.Canvas:
         canvas = tk.Canvas(
             self.root,
             width=grid_w * cell,
@@ -64,17 +69,17 @@ class SimApp:
         )
         speed_scale.set(1.0)
         speed_scale.pack(side="left")
+        return canvas
 
+    def _create_simulation(
+        self, canvas: tk.Canvas, grid_w: int, grid_h: int, cell: int
+    ):
         self.renderer = Renderer(canvas, grid_w, grid_h, cell)
-
         self.world = World(self.config)
         self.renderer.draw_grid()
         self.world.spawn()
-
         self.stats_recorder = StatsRecorder()
-
         self.stats = StatsWindow(self.root)
-        self.tick()
 
     def tick(self) -> None:
         # safegurad if attributes are not declared

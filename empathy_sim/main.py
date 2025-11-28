@@ -3,7 +3,7 @@
 import tkinter as tk
 from empathy_sim.config import SimConfig
 from empathy_sim.version import __verison__
-from empathy_sim.ui.sim_app import SimApp
+from empathy_sim.sim_app import SimApp
 
 
 def main() -> None:
