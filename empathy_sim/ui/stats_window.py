@@ -12,7 +12,7 @@ class StatsWindow:
     LABEL_PAD_X = 10
     LABEL_PAD_Y = 5
 
-    GRAPH_MARGIN = 10
+    GRAPH_MARGIN = 20
     MAX_POINTS_GRAPH = 1000
 
     LEGEND_Y_OFFSET = 70
@@ -124,11 +124,13 @@ class StatsWindow:
         points = self._build_points(series, to_canvas)
         self._draw_series(points)
         self._draw_legend()
-        self._create_axis(graph_top, graph_bottom, h, w, margin, history)
+        self._create_axis(graph_top, graph_bottom, h, w, margin, history, max_y)
 
     # ---------------------------------------------------------------------------------
 
-    def _create_axis(self, graph_top, graph_bottom, h, w, margin, history) -> None:
+    def _create_axis(
+        self, graph_top, graph_bottom, h, w, margin, history, max_y
+    ) -> None:
         # Y axis
         self.canvas.create_line(
             graph_top,
@@ -157,18 +159,40 @@ class StatsWindow:
         if tick_count < 10:
             return
 
-        step = tick_count // 10
+        step_x = tick_count // 10
 
         def tick_to_x(i):
             return margin + (w * i) / (tick_count - 1)
 
-        for i in range(0, tick_count, step):
+        for i in range(0, tick_count, step_x):
             x = tick_to_x(i)
             self.canvas.create_text(
                 x,
                 margin + h,
                 text=str(i),
                 anchor="n",
+                fill="#cccccc",
+                tags="graph",
+            )
+
+        # --- Y-axis tick labels ---
+        if max_y <= 0:
+            return
+
+        step_y = max(1, int(max_y // 5))
+
+        def value_to_y(v: int) -> float:
+            return graph_bottom - (h * v) / max_y
+
+        for v in range(0, int(max_y + 1), step_y):
+            if v == 0:
+                continue
+            y = value_to_y(v)
+            self.canvas.create_text(
+                margin - 4,
+                y,
+                text=str(v),
+                anchor="e",
                 fill="#cccccc",
                 tags="graph",
             )
@@ -199,11 +223,6 @@ class StatsWindow:
         for name, pts in points.items():
             for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
                 self.canvas.create_line(x1, y1, x2, y2, fill=colors[name], tags="graph")
-
-    def _draw_axis(
-        self,
-    ) -> None:
-        pass
 
     def _draw_legend(self) -> None:
         legend_x = self.LEGEND_X_OFFSET
