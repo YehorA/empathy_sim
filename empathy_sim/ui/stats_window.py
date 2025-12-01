@@ -6,8 +6,8 @@ if TYPE_CHECKING:
 
 
 class StatsWindow:
-    WINDOW_WIDTH = 400
-    WINDOW_HEIGHT = 200
+    WINDOW_WIDTH = 500
+    WINDOW_HEIGHT = 300
 
     LABEL_PAD_X = 10
     LABEL_PAD_Y = 5
@@ -19,6 +19,8 @@ class StatsWindow:
     LEGEND_X_OFFSET = 15
 
     FOOD_SCALE = 10
+
+    LEGEND_HEIGHT = 80
 
     SERIES_COLORS = {
         "alive": "#3ae424",
@@ -107,8 +109,10 @@ class StatsWindow:
         series, max_y = self._get_series(history)
 
         margin = self.GRAPH_MARGIN
+        graph_top = margin
+        graph_bottom = self.height - self.LEGEND_HEIGHT  # reserve bottom space
+        h = graph_bottom - graph_top
         w = self.width - 2 * margin
-        h = self.height - 2 * margin
 
         n = len(next(iter(series.values())))
 
@@ -120,8 +124,54 @@ class StatsWindow:
         points = self._build_points(series, to_canvas)
         self._draw_series(points)
         self._draw_legend()
+        self._create_axis(graph_top, graph_bottom, h, w, margin, history)
 
     # ---------------------------------------------------------------------------------
+
+    def _create_axis(self, graph_top, graph_bottom, h, w, margin, history) -> None:
+        # Y axis
+        self.canvas.create_line(
+            graph_top,
+            graph_bottom,
+            margin,
+            margin,
+            fill="#E7E7E7",
+            arrow=tk.LAST,
+            arrowshape=(6, 8, 4),
+            tags="graph",
+        )
+
+        # X axis
+        self.canvas.create_line(
+            margin,
+            margin + h,
+            margin + w,
+            margin + h,
+            arrow=tk.LAST,
+            fill="#E7E7E7",
+            tags="graph",
+        )
+
+        # --- X-axis tick labels ---
+        tick_count = history[-1][0]
+        if tick_count < 10:
+            return
+
+        step = tick_count // 10
+
+        def tick_to_x(i):
+            return margin + (w * i) / (tick_count - 1)
+
+        for i in range(0, tick_count, step):
+            x = tick_to_x(i)
+            self.canvas.create_text(
+                x,
+                margin + h,
+                text=str(i),
+                anchor="n",
+                fill="#cccccc",
+                tags="graph",
+            )
 
     def _get_series(self, history):
         _, alive, food, empathic, selfish, _ = zip(*history)
@@ -150,31 +200,38 @@ class StatsWindow:
             for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
                 self.canvas.create_line(x1, y1, x2, y2, fill=colors[name], tags="graph")
 
+    def _draw_axis(
+        self,
+    ) -> None:
+        pass
+
     def _draw_legend(self) -> None:
-        # -------------- Legend ---------------
         legend_x = self.LEGEND_X_OFFSET
-        legend_y = self.height - self.LEGEND_Y_OFFSET
+        legend_y = self.height - self.LEGEND_HEIGHT + 40
 
-        items = self.LEGEND_ITEMS
-
-        for idx, (label, name) in enumerate(items):
-            y = legend_y + idx * 15
-
+        x = legend_x
+        for label, name in self.LEGEND_ITEMS:
+            # box
             self.canvas.create_rectangle(
-                legend_x,
-                y,
-                legend_x + 10,
-                y + 10,
+                x,
+                legend_y,
+                x + 10,
+                legend_y + 10,
                 fill=self.SERIES_COLORS[name],
                 outline="",
                 tags="graph",
             )
 
-            self.canvas.create_text(
-                legend_x + 20,
-                y + 5,
+            # text
+            text_id = self.canvas.create_text(
+                x + 20,
+                legend_y + 5,
                 text=label,
                 anchor="w",
                 fill="#ffffff",
                 tags="graph",
             )
+
+            bbox = self.canvas.bbox(text_id)
+            text_width = bbox[2] - bbox[0]
+            x += 20 + text_width + 15
