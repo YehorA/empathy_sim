@@ -1,6 +1,7 @@
 import tkinter as tk
 import random as rnd
 from empathy_sim.core.utils import clamp
+from empathy_sim.core.gene import Gene
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -10,6 +11,13 @@ if TYPE_CHECKING:
 class Agent:
     def __init__(self, config: "SimConfig", x: int = 0, y: int = 0):
         self.cfg = config
+        self.gene = Gene(
+            empathy=rnd.choice([True, False]),
+            help_amount=config.energy_to_share,
+            min_energy_to_have=config.can_help_energy,
+            help_threshold=config.need_help_energy_below,
+            mutation_rate=config.default_mutation_chance,
+        )
         self.coords = (x, y)
         self.energy = self.cfg.default_starting_energy
         self.alive = True
@@ -19,8 +27,6 @@ class Agent:
         self.age = self.cfg.starting_age
         self.reproduction_cooldown = self.cfg.default_reproduction_cooldown
         self.death_time = 0
-
-        self.empathy = True
 
     def place_random(self, size: tuple[int, int]) -> None:
         w, h = size
@@ -55,7 +61,7 @@ class Agent:
         t = self.energy / self.max_energy
         t = max(0.0, min(t, 1.0))
 
-        if self.empathy:
+        if self.gene.empathy:
             low_rgb = (16, 16, 64)
             high_rgb = (80, 180, 255)
         else:

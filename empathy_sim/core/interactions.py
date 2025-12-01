@@ -22,12 +22,7 @@ def reproduction(world: "World", agent: Agent, agents_nearby: list[Agent]) -> No
             spawn_pos = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
             a = Agent(cfg)
 
-            if agent.empathy and other_agent.empathy:
-                a.empathy = True
-            elif agent.empathy or other_agent.empathy:
-                a.empathy = rnd.choice([True, False])
-            else:
-                a.empathy = False
+            a.gene = a.gene.crossover(agent.gene, other_agent.gene)
 
             a.place_on_coords(
                 agent.coords[0] + spawn_pos[0],
@@ -40,12 +35,12 @@ def reproduction(world: "World", agent: Agent, agents_nearby: list[Agent]) -> No
 def help_other_agent(world: "World", agent: Agent, agents_nearby: list[Agent]) -> None:
     cfg = world.config
 
-    if agent.empathy and agent.energy > cfg.can_help_energy:
+    if agent.gene.empathy and agent.energy > cfg.can_help_energy:
         need_help_agents: list[Agent] = []
         for i in agents_nearby:
-            if i.alive and i.energy < cfg.need_help_energy_below:
+            if i.alive and i.energy < agent.gene.help_threshold:
                 need_help_agents.append(i)
         if need_help_agents:
             other_agent = rnd.choice(need_help_agents)
-            agent.energy -= cfg.energy_to_share
-            other_agent.energy += cfg.energy_to_share
+            agent.energy -= agent.gene.help_amount
+            other_agent.energy += agent.gene.help_amount

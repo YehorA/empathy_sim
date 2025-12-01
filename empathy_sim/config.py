@@ -39,3 +39,5 @@ class SimConfig:
     reproduction_cooldown_after_reproduction: int = 20
     movement_energy: int = 1
     eating_energy: int = 1
+
+    default_mutation_chance: float = 0.02

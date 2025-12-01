@@ -27,10 +27,10 @@ class World:
         return len(self.alive_agents)
 
     def count_alive_emphatic(self) -> int:
-        return sum(1 for a in self.alive_agents if a.empathy)
+        return sum(1 for a in self.alive_agents if a.gene.empathy)
 
     def count_alive_selfish(self) -> int:
-        return sum(1 for a in self.alive_agents if not a.empathy)
+        return sum(1 for a in self.alive_agents if not a.gene.empathy)
 
     def average_energy(self) -> float:
         alive = self.alive_agents
@@ -49,11 +49,12 @@ class World:
         for _ in range(self.config.spawn_emphatic):
             a = Agent(self.config)
             a.place_random((self.width, self.height))
+            a.gene.empathy = True
             self.agents.append(a)
         for _ in range(self.config.spawn_selfish):
             a = Agent(self.config)
             a.place_random((self.width, self.height))
-            a.empathy = False
+            a.gene.empathy = False
             self.agents.append(a)
 
     def coord_food_view(self, x, y) -> dict[tuple[int, int], int]:
